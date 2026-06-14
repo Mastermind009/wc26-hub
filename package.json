@@ -1,0 +1,29 @@
+{
+  "name": "wc26-hub",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:server": "node server/index.js",
+    "dev:all": "concurrently \"npm run dev:server\" \"npm run dev\"",
+    "build": "tsc -b && vite build",
+    "start": "node server/index.js",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "concurrently": "^9.1.2",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5"
+  }
+}
