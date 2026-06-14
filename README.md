@@ -35,15 +35,13 @@ Regular visitors only see and edit their own predictions.
 
 ## Deploy (free — share with friends)
 
-See **[DEPLOY.md](./DEPLOY.md)** for the full guide. Quickest path:
+**One-click Render deploy:**  
+https://render.com/deploy?repo=https://github.com/Mastermind009/wc26-hub
 
-1. Push repo to GitHub
-2. Sign up at [render.com](https://render.com)
-3. Deploy from repo (uses `render.yaml`)
-4. Set `ADMIN_SECRET` in Render dashboard
-5. Share your `https://….onrender.com` URL
+After deploy starts, set environment variable in Render dashboard:
+- `ADMIN_SECRET` = `12345` (or your own secret)
 
-Free tier sleeps when idle; first visit after sleep may take ~30s.
+See **[DEPLOY.md](./DEPLOY.md)** for details.
 
 ## Data Sources
 

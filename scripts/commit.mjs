@@ -16,12 +16,17 @@ process.env.GIT_AUTHOR_NAME = name;
 process.env.GIT_AUTHOR_EMAIL = email;
 process.env.GIT_COMMITTER_NAME = name;
 process.env.GIT_COMMITTER_EMAIL = email;
-const commit = run('git', [
-  'commit-tree',
-  tree,
-  '-m',
-  'Deploy WC26 Hub with predictions and Render config',
-]);
+
+let parent = '';
+try {
+  parent = run('git', ['rev-parse', 'HEAD']);
+} catch {
+  parent = '';
+}
+
+const args = ['commit-tree', tree, '-m', 'Add Render deploy docs and setup guide'];
+if (parent) args.push('-p', parent);
+
+const commit = run('git', args);
 run('git', ['update-ref', 'refs/heads/main', commit]);
-run('git', ['symbolic-ref', 'HEAD', 'refs/heads/main']);
 console.log(run('git', ['log', '-1', '--oneline']));
