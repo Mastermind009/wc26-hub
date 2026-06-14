@@ -17,10 +17,13 @@ export default defineConfig({
         target: 'http://localhost:3001',
         changeOrigin: true,
       },
-      '/api/wc': {
-        target: 'https://worldcup26.ir',
+      '/api/data': {
+        target: 'http://localhost:3001',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/wc/, '/get'),
+      },
+      '/api/wc': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
       },
     },
   },

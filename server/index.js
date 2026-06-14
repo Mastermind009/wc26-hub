@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { getAllPredictions, getPredictionsByClient, upsertPredictions } from './store.js';
+import { getWcBundle, getWcData } from './wcProxy.js';
 
 dotenv.config();
 
@@ -96,15 +97,19 @@ app.get('/api/admin/predictions', async (req, res) => {
   }
 });
 
+app.get('/api/data', async (_req, res) => {
+  try {
+    const bundle = await getWcBundle();
+    res.json(bundle);
+  } catch (err) {
+    res.status(502).json({ error: 'World Cup API unavailable' });
+  }
+});
+
 app.use('/api/wc', async (req, res) => {
   try {
-    const upstream = `https://worldcup26.ir/get${req.url}`;
-    const response = await fetch(upstream);
-    if (!response.ok) {
-      res.status(response.status).json({ error: 'World Cup API error' });
-      return;
-    }
-    res.json(await response.json());
+    const data = await getWcData(req.url || '/');
+    res.json(data);
   } catch (err) {
     res.status(502).json({ error: 'World Cup API unavailable' });
   }
@@ -117,6 +122,10 @@ app.get('*', (req, res, next) => {
   res.sendFile(path.join(distPath, 'index.html'), (err) => {
     if (err) res.status(404).json({ error: 'Not found' });
   });
+});
+
+app.use('/api', (_req, res) => {
+  res.status(404).json({ error: 'API route not found' });
 });
 
 app.listen(PORT, HOST, () => {

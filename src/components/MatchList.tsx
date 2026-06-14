@@ -22,7 +22,14 @@ export function MatchList({ matches, teams, loading, error }: MatchListProps) {
   }
 
   if (error && matches.length === 0) {
-    return <div className="state-msg error">{error}</div>;
+    return (
+      <div className="state-msg error">
+        <p>{error}</p>
+        <button type="button" className="retry-btn" onClick={() => window.location.reload()}>
+          Retry
+        </button>
+      </div>
+    );
   }
 
   if (matches.length === 0) {

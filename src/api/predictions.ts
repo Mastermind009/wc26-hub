@@ -23,8 +23,24 @@ async function parseResponse<T>(res: Response): Promise<T> {
   return data as T;
 }
 
+async function fetchWithRetry(url: string, init?: RequestInit): Promise<Response> {
+  const retryable = new Set([404, 502, 503, 504]);
+  let lastResponse: Response | null = null;
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const res = await fetch(url, init);
+    lastResponse = res;
+    if (res.ok || !retryable.has(res.status) || attempt === 3) {
+      return res;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1500 * (attempt + 1)));
+  }
+
+  return lastResponse!;
+}
+
 export async function fetchMyPredictions(clientId: string): Promise<Prediction[]> {
-  const res = await fetch(`${PREDICTIONS_API}/predictions/${clientId}`);
+  const res = await fetchWithRetry(`${PREDICTIONS_API}/predictions/${clientId}`);
   const data = await parseResponse<{ predictions: Prediction[] }>(res);
   return data.predictions;
 }
@@ -34,7 +50,7 @@ export async function submitPredictions(payload: {
   displayName: string;
   predictions: PredictionInput[];
 }): Promise<Prediction[]> {
-  const res = await fetch(`${PREDICTIONS_API}/predictions`, {
+  const res = await fetchWithRetry(`${PREDICTIONS_API}/predictions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -44,7 +60,7 @@ export async function submitPredictions(payload: {
 }
 
 export async function verifyAdminSecret(secret: string): Promise<boolean> {
-  const res = await fetch(`${PREDICTIONS_API}/admin/verify`, {
+  const res = await fetchWithRetry(`${PREDICTIONS_API}/admin/verify`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ secret }),
@@ -53,7 +69,7 @@ export async function verifyAdminSecret(secret: string): Promise<boolean> {
 }
 
 export async function fetchAllPredictions(adminSecret: string): Promise<Prediction[]> {
-  const res = await fetch(`${PREDICTIONS_API}/admin/predictions`, {
+  const res = await fetchWithRetry(`${PREDICTIONS_API}/admin/predictions`, {
     headers: { 'X-Admin-Secret': adminSecret },
   });
   const data = await parseResponse<{ predictions: Prediction[] }>(res);

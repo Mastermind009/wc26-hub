@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fetchAllData } from './api';
 import type { EnrichedMatch, MatchFilter, Stadium, Team } from './types';
 import { enrichMatch } from './utils';
@@ -22,11 +22,12 @@ export default function App() {
   const [activeFilter, setActiveFilter] = useState<MatchFilter>('all');
   const [selectedTeam, setSelectedTeam] = useState('');
   const [activeTab, setActiveTab] = useState<'matches' | 'players' | 'predictions'>('matches');
+  const hasLoadedData = useRef(false);
 
   const loadData = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     try {
-      const { matches: rawMatches, teams: rawTeams, stadiums } = await fetchAllData();
+      const { matches: rawMatches, teams: rawTeams, stadiums, partial } = await fetchAllData();
       const stadiumMap = new Map<string, Stadium>(stadiums.map((s) => [s.id, s]));
       const enriched = rawMatches
         .map((m) => enrichMatch(m, stadiumMap))
@@ -34,10 +35,20 @@ export default function App() {
 
       setMatches(enriched);
       setTeams(rawTeams.sort((a, b) => a.name_en.localeCompare(b.name_en)));
-      setError(null);
+      hasLoadedData.current = enriched.length > 0;
+      setError(
+        partial && enriched.length === 0
+          ? 'Some match data is still loading. Tap refresh to try again.'
+          : null,
+      );
       setLastUpdated(new Date());
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load data');
+      const message = err instanceof Error ? err.message : 'Failed to load data';
+      setError(
+        hasLoadedData.current
+          ? `${message} — showing last loaded data.`
+          : `${message} — tap refresh to retry.`,
+      );
     } finally {
       setLoading(false);
     }

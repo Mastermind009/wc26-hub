@@ -24,7 +24,7 @@ try {
   parent = '';
 }
 
-const args = ['commit-tree', tree, '-m', 'Add Render deploy docs and setup guide'];
+const args = ['commit-tree', tree, '-m', 'Fix API 502/404 with cached bundle endpoint and retries'];
 if (parent) args.push('-p', parent);
 
 const commit = run('git', args);
