@@ -9,7 +9,7 @@ import {
   setAdminSecret,
   setDisplayName,
 } from '../lib/clientId';
-import { getTeamDisplayName } from '../utils';
+import { getTeamDisplayName, sortMatchesForDisplay } from '../utils';
 
 interface PredictionsTabProps {
   matches: EnrichedMatch[];
@@ -35,14 +35,25 @@ export function PredictionsTab({ matches, teams }: PredictionsTabProps) {
   const [adminView, setAdminView] = useState(false);
 
   const openMatches = useMemo(
-    () => matches.filter((m) => m.finished !== 'TRUE' && !m.isLive),
+    () =>
+      sortMatchesForDisplay(
+        matches.filter((m) => m.finished !== 'TRUE' && !m.isLive),
+      ),
     [matches],
   );
 
-  const loadMine = useCallback(async () => {
+  const loadMine = useCallback(async (predictorName: string) => {
+    const trimmed = predictorName.trim();
+    if (!trimmed) {
+      setScores({});
+      setSaved(new Set());
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
-      const predictions = await fetchMyPredictions(clientId);
+      const predictions = await fetchMyPredictions(trimmed);
       const nextScores: ScoreMap = {};
       const nextSaved = new Set<string>();
       for (const p of predictions) {
@@ -57,7 +68,7 @@ export function PredictionsTab({ matches, teams }: PredictionsTabProps) {
     } finally {
       setLoading(false);
     }
-  }, [clientId]);
+  }, []);
 
   const loadAdmin = useCallback(async () => {
     if (!adminSecret) return;
@@ -77,7 +88,9 @@ export function PredictionsTab({ matches, teams }: PredictionsTabProps) {
   }, [adminSecret]);
 
   useEffect(() => {
-    loadMine();
+    const savedName = getDisplayName();
+    if (savedName) loadMine(savedName);
+    else setLoading(false);
   }, [loadMine]);
 
   useEffect(() => {
@@ -129,7 +142,8 @@ export function PredictionsTab({ matches, teams }: PredictionsTabProps) {
         predictions,
       });
       setSaved(new Set(result.map((p) => p.matchId)));
-      setMessage(`Saved ${result.length} prediction${result.length === 1 ? '' : 's'}.`);
+      setMessage(`Saved ${result.length} prediction${result.length === 1 ? '' : 's'} for ${name.trim()}.`);
+      await loadMine(name.trim());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save predictions');
     } finally {
@@ -166,7 +180,10 @@ export function PredictionsTab({ matches, teams }: PredictionsTabProps) {
       <div className="predictions-header">
         <div>
           <h2>Predictions</h2>
-          <p>Predict scores for upcoming matches. Your picks are saved to this site&apos;s server.</p>
+          <p>
+            Predict scores for upcoming matches. Each name keeps its own picks — friends can
+            all predict from the same phone without overwriting each other.
+          </p>
         </div>
         <div className="predictions-actions">
           {adminSecret ? (
@@ -231,6 +248,9 @@ export function PredictionsTab({ matches, teams }: PredictionsTabProps) {
               id="predictor-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              onBlur={() => {
+                if (name.trim()) loadMine(name.trim());
+              }}
               placeholder="How should we label your predictions?"
             />
           </div>
@@ -304,12 +324,24 @@ function AdminPredictionsView({
   const grouped = useMemo(() => {
     const map = new Map<string, typeof predictions>();
     for (const p of predictions) {
-      const key = `${p.displayName}::${p.clientId}`;
+      const key = p.displayName.trim().toLowerCase();
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(p);
     }
-    return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, [predictions]);
+
+    return [...map.entries()]
+      .sort((a, b) => a[1][0].displayName.localeCompare(b[1][0].displayName))
+      .map(([key, items]) => {
+        const sortedItems = [...items].sort((a, b) => {
+          const matchA = matches.get(a.matchId);
+          const matchB = matches.get(b.matchId);
+          const timeA = matchA?.kickoffIst.getTime() ?? Number(a.matchId);
+          const timeB = matchB?.kickoffIst.getTime() ?? Number(b.matchId);
+          return timeA - timeB;
+        });
+        return [key, sortedItems] as const;
+      });
+  }, [predictions, matches]);
 
   function teamFlag(name: string) {
     return teams.find((t) => t.name_en === name)?.flag ?? '';

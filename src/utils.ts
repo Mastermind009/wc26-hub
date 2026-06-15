@@ -121,6 +121,25 @@ export function isLiveMatch(match: Match): boolean {
   return elapsed !== 'notstarted' && elapsed !== 'finished' && match.finished !== 'TRUE';
 }
 
+export function sortMatchesForDisplay(matches: EnrichedMatch[]): EnrichedMatch[] {
+  const rank = (match: EnrichedMatch) => {
+    if (match.isLive) return 0;
+    if (match.finished !== 'TRUE') return 1;
+    return 2;
+  };
+
+  return [...matches].sort((a, b) => {
+    const rankDiff = rank(a) - rank(b);
+    if (rankDiff !== 0) return rankDiff;
+
+    if (rank(a) === 2) {
+      return b.kickoffIst.getTime() - a.kickoffIst.getTime();
+    }
+
+    return a.kickoffIst.getTime() - b.kickoffIst.getTime();
+  });
+}
+
 export function enrichMatch(match: Match, stadiums: Map<string, Stadium>): EnrichedMatch {
   const stadium = stadiums.get(match.stadium_id);
   const kickoffUtc = parseLocalDate(match.local_date, match.stadium_id);

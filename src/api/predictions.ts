@@ -39,8 +39,9 @@ async function fetchWithRetry(url: string, init?: RequestInit): Promise<Response
   return lastResponse!;
 }
 
-export async function fetchMyPredictions(clientId: string): Promise<Prediction[]> {
-  const res = await fetchWithRetry(`${PREDICTIONS_API}/predictions/${clientId}`);
+export async function fetchMyPredictions(displayName: string): Promise<Prediction[]> {
+  const params = new URLSearchParams({ displayName: displayName.trim() });
+  const res = await fetchWithRetry(`${PREDICTIONS_API}/predictions/mine?${params}`);
   const data = await parseResponse<{ predictions: Prediction[] }>(res);
   return data.predictions;
 }

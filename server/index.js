@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-import { getAllPredictions, getPredictionsByClient, upsertPredictions } from './store.js';
+import { getAllPredictions, getPredictionsByDisplayName, upsertPredictions } from './store.js';
 import { getWcBundle, getWcData } from './wcProxy.js';
 
 dotenv.config();
@@ -34,9 +34,14 @@ app.post('/api/admin/verify', (req, res) => {
   res.status(401).json({ error: 'Invalid admin secret' });
 });
 
-app.get('/api/predictions/:clientId', async (req, res) => {
+app.get('/api/predictions/mine', async (req, res) => {
   try {
-    const predictions = await getPredictionsByClient(req.params.clientId);
+    const displayName = String(req.query.displayName ?? '').trim();
+    if (!displayName) {
+      res.status(400).json({ error: 'displayName query parameter is required' });
+      return;
+    }
+    const predictions = await getPredictionsByDisplayName(displayName);
     res.json({ predictions });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -46,8 +51,8 @@ app.get('/api/predictions/:clientId', async (req, res) => {
 app.post('/api/predictions', async (req, res) => {
   try {
     const { clientId, displayName, predictions } = req.body ?? {};
-    if (!clientId || !displayName?.trim()) {
-      res.status(400).json({ error: 'clientId and displayName are required' });
+    if (!displayName?.trim()) {
+      res.status(400).json({ error: 'displayName is required' });
       return;
     }
     if (!Array.isArray(predictions) || predictions.length === 0) {
@@ -69,7 +74,7 @@ app.post('/api/predictions', async (req, res) => {
     }
 
     const saved = await upsertPredictions({
-      clientId,
+      clientId: clientId ?? 'anonymous',
       displayName: displayName.trim(),
       predictions: predictions.map((p) => ({
         matchId: String(p.matchId),

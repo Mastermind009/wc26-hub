@@ -24,7 +24,7 @@ try {
   parent = '';
 }
 
-const args = ['commit-tree', tree, '-m', 'Fix API 502/404 with cached bundle endpoint and retries'];
+const args = ['commit-tree', tree, '-m', 'Fix predictions per name and prioritize upcoming matches'];
 if (parent) args.push('-p', parent);
 
 const commit = run('git', args);

@@ -5,6 +5,10 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_FILE = path.join(__dirname, 'data', 'predictions.json');
 
+function normalizeDisplayName(name) {
+  return name.trim().toLowerCase();
+}
+
 async function readDb() {
   try {
     const raw = await fs.readFile(DATA_FILE, 'utf8');
@@ -19,29 +23,38 @@ async function writeDb(data) {
   await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
 }
 
-export async function getPredictionsByClient(clientId) {
+export async function getPredictionsByDisplayName(displayName) {
   const db = await readDb();
-  return db.predictions.filter((p) => p.clientId === clientId);
+  const key = normalizeDisplayName(displayName);
+  return db.predictions
+    .filter((p) => normalizeDisplayName(p.displayName) === key)
+    .sort((a, b) => a.matchId.localeCompare(b.matchId, undefined, { numeric: true }));
 }
 
 export async function getAllPredictions() {
   const db = await readDb();
-  return db.predictions.sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-  );
+  return db.predictions.sort((a, b) => {
+    const nameCmp = normalizeDisplayName(a.displayName).localeCompare(
+      normalizeDisplayName(b.displayName),
+    );
+    if (nameCmp !== 0) return nameCmp;
+    return a.matchId.localeCompare(b.matchId, undefined, { numeric: true });
+  });
 }
 
 export async function upsertPredictions({ clientId, displayName, predictions }) {
   const db = await readDb();
   const now = new Date().toISOString();
+  const trimmedName = displayName.trim();
+  const nameKey = normalizeDisplayName(trimmedName);
 
   for (const entry of predictions) {
     const idx = db.predictions.findIndex(
-      (p) => p.clientId === clientId && p.matchId === entry.matchId,
+      (p) => normalizeDisplayName(p.displayName) === nameKey && p.matchId === entry.matchId,
     );
     const record = {
       clientId,
-      displayName,
+      displayName: trimmedName,
       matchId: entry.matchId,
       homeScore: entry.homeScore,
       awayScore: entry.awayScore,
@@ -52,5 +65,5 @@ export async function upsertPredictions({ clientId, displayName, predictions }) 
   }
 
   await writeDb(db);
-  return getPredictionsByClient(clientId);
+  return getPredictionsByDisplayName(trimmedName);
 }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fetchAllData } from './api';
 import type { EnrichedMatch, MatchFilter, Stadium, Team } from './types';
-import { enrichMatch } from './utils';
+import { enrichMatch, sortMatchesForDisplay } from './utils';
 import { getTopPlayers } from './data/players';
 import { Header } from './components/Header';
 import { FilterBar } from './components/FilterBar';
@@ -29,9 +29,9 @@ export default function App() {
     try {
       const { matches: rawMatches, teams: rawTeams, stadiums, partial } = await fetchAllData();
       const stadiumMap = new Map<string, Stadium>(stadiums.map((s) => [s.id, s]));
-      const enriched = rawMatches
-        .map((m) => enrichMatch(m, stadiumMap))
-        .sort((a, b) => a.kickoffIst.getTime() - b.kickoffIst.getTime());
+      const enriched = sortMatchesForDisplay(
+        rawMatches.map((m) => enrichMatch(m, stadiumMap)),
+      );
 
       setMatches(enriched);
       setTeams(rawTeams.sort((a, b) => a.name_en.localeCompare(b.name_en)));
