@@ -1,0 +1,1234 @@
+/* Map-first luxury itinerary */
+
+:root {
+  --bg: #0a0e17;
+  --surface: #121826;
+  --surface-2: #1a2235;
+  --glass: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text: #f0f2f7;
+  --text-muted: #94a3b8;
+  --gold: #e8c872;
+  --gold-dim: #a68b4b;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --bali: #14b8a6;
+  --bali-glow: rgba(20, 184, 166, 0.35);
+  --java: #34d399;
+  --java-glow: rgba(52, 211, 153, 0.3);
+  --sg: #a78bfa;
+  --sg-glow: rgba(167, 139, 250, 0.35);
+  --travel: #60a5fa;
+  --travel-glow: rgba(96, 165, 250, 0.35);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(232, 200, 114, 0.08), transparent 28%),
+    radial-gradient(circle at 82% 20%, rgba(167, 139, 250, 0.11), transparent 30%),
+    linear-gradient(180deg, #0a0e17 0%, #0d1321 52%, #080b12 100%);
+  transition: background 0.35s ease;
+}
+
+.app::before,
+.app::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.35s ease, background 0.35s ease;
+}
+
+.app::before { opacity: 0.95; }
+
+.app::after {
+  opacity: 0.38;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
+}
+
+.app--bali::before {
+  background:
+    radial-gradient(ellipse at 22% 18%, rgba(251, 191, 36, 0.24), transparent 30%),
+    radial-gradient(ellipse at 80% 12%, rgba(45, 212, 191, 0.28), transparent 34%),
+    radial-gradient(ellipse at 50% 82%, rgba(245, 158, 11, 0.18), transparent 35%),
+    linear-gradient(135deg, rgba(13, 148, 136, 0.28), rgba(8, 47, 73, 0.24) 46%, rgba(120, 53, 15, 0.16));
+}
+
+.app--bali::after {
+  opacity: 0.28;
+  background-image:
+    radial-gradient(ellipse at 20% 90%, rgba(255,255,255,0.16), transparent 18%),
+    radial-gradient(ellipse at 55% 92%, rgba(255,255,255,0.13), transparent 16%),
+    linear-gradient(115deg, transparent 0 44%, rgba(255,255,255,0.055) 45% 46%, transparent 47%);
+  background-size: 520px 220px, 620px 240px, 36px 36px;
+}
+
+.app--singapore::before {
+  background:
+    radial-gradient(ellipse at 76% 12%, rgba(168, 85, 247, 0.32), transparent 30%),
+    radial-gradient(ellipse at 22% 20%, rgba(14, 165, 233, 0.24), transparent 28%),
+    radial-gradient(ellipse at 50% 92%, rgba(236, 72, 153, 0.18), transparent 34%),
+    linear-gradient(135deg, rgba(30, 41, 59, 0.2), rgba(46, 16, 101, 0.28) 52%, rgba(15, 23, 42, 0.45));
+}
+
+.app--singapore::after {
+  opacity: 0.42;
+  background-image:
+    linear-gradient(to top, rgba(255,255,255,0.08) 0 42%, transparent 43%),
+    linear-gradient(90deg, rgba(96, 165, 250, 0.06) 1px, transparent 1px),
+    linear-gradient(rgba(167, 139, 250, 0.05) 1px, transparent 1px);
+  background-size: 46px 180px, 44px 44px, 44px 44px;
+  background-position: bottom left, center, center;
+}
+
+.app--java::before {
+  background:
+    radial-gradient(ellipse at 72% 16%, rgba(52, 211, 153, 0.24), transparent 28%),
+    radial-gradient(ellipse at 28% 80%, rgba(22, 101, 52, 0.36), transparent 34%),
+    linear-gradient(145deg, rgba(6, 78, 59, 0.36), rgba(20, 83, 45, 0.22) 45%, rgba(31, 41, 55, 0.22));
+}
+
+.app--java::after {
+  opacity: 0.26;
+  background-image:
+    radial-gradient(ellipse at 50% 100%, rgba(255,255,255,0.1), transparent 30%),
+    linear-gradient(135deg, transparent 0 48%, rgba(255,255,255,0.035) 49% 50%, transparent 51%);
+  background-size: 560px 260px, 34px 34px;
+}
+
+.app--travel::before {
+  background:
+    radial-gradient(ellipse at 18% 18%, rgba(96, 165, 250, 0.24), transparent 30%),
+    radial-gradient(ellipse at 78% 22%, rgba(232, 200, 114, 0.16), transparent 28%),
+    linear-gradient(135deg, rgba(30, 64, 175, 0.26), rgba(15, 23, 42, 0.44));
+}
+
+/* ── Masthead ── */
+.masthead {
+  position: relative;
+  padding: 1.5rem 1.25rem 1rem;
+  overflow: hidden;
+  border-bottom: 1px solid var(--glass-border);
+  background: linear-gradient(180deg, rgba(10, 14, 23, 0.82), rgba(10, 14, 23, 0.36));
+  backdrop-filter: blur(10px);
+}
+
+.masthead__glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.masthead__glow--1 {
+  width: 400px; height: 300px;
+  top: -120px; left: -80px;
+  background: var(--bali-glow);
+}
+
+.masthead__glow--2 {
+  width: 350px; height: 280px;
+  top: -60px; right: -60px;
+  background: var(--sg-glow);
+}
+
+.app--bali .masthead__glow--1 {
+  background: rgba(20, 184, 166, 0.48);
+}
+
+.app--bali .masthead__glow--2 {
+  background: rgba(251, 191, 36, 0.36);
+}
+
+.app--singapore .masthead__glow--1 {
+  background: rgba(14, 165, 233, 0.32);
+}
+
+.app--singapore .masthead__glow--2 {
+  background: rgba(167, 139, 250, 0.55);
+}
+
+.app--java .masthead__glow--1 {
+  background: rgba(52, 211, 153, 0.42);
+}
+
+.app--java .masthead__glow--2 {
+  background: rgba(22, 101, 52, 0.36);
+}
+
+.app--travel .masthead__glow--1 {
+  background: rgba(96, 165, 250, 0.46);
+}
+
+.app--travel .masthead__glow--2 {
+  background: rgba(232, 200, 114, 0.26);
+}
+
+.masthead__inner { position: relative; max-width: 1400px; margin: 0 auto; }
+
+.masthead__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.masthead__eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 0.35rem;
+}
+
+.masthead__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #fff 30%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.masthead__tagline {
+  margin: 0.35rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.btn {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.btn--glass {
+  background: var(--glass);
+  color: var(--text);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(8px);
+}
+
+.btn--glass:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
+
+.masthead__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Journey strip */
+.journey-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.journey-strip__segment { display: flex; align-items: center; }
+
+.journey-strip__stop {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--glass);
+  border-radius: 999px;
+  border: 1px solid var(--glass-border);
+}
+
+.journey-strip__icon { font-size: 0.9rem; }
+
+.journey-strip__line {
+  width: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold-dim), transparent);
+  margin: 0 0.15rem;
+}
+
+.journey-strip__days {
+  margin-left: auto;
+  color: var(--gold);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+/* ── Calendar board ── */
+.calendar-board {
+  position: relative;
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(232, 200, 114, 0.16), transparent 30%),
+    linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  border: 1px solid var(--glass-border);
+  border-radius: calc(var(--radius) + 6px);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+}
+
+.app--bali .calendar-board {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(251, 191, 36, 0.22), transparent 30%),
+    radial-gradient(circle at 90% 10%, rgba(45, 212, 191, 0.2), transparent 30%),
+    linear-gradient(135deg, rgba(15, 118, 110, 0.3), rgba(255,255,255,0.035));
+}
+
+.app--singapore .calendar-board {
+  background:
+    radial-gradient(circle at 82% 0%, rgba(167, 139, 250, 0.24), transparent 30%),
+    radial-gradient(circle at 10% 8%, rgba(14, 165, 233, 0.16), transparent 28%),
+    linear-gradient(135deg, rgba(76, 29, 149, 0.28), rgba(255,255,255,0.035));
+}
+
+.app--java .calendar-board {
+  background:
+    radial-gradient(circle at 82% 0%, rgba(52, 211, 153, 0.2), transparent 30%),
+    linear-gradient(135deg, rgba(6, 95, 70, 0.32), rgba(255,255,255,0.035));
+}
+
+.app--travel .calendar-board {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(96, 165, 250, 0.2), transparent 30%),
+    linear-gradient(135deg, rgba(30, 64, 175, 0.32), rgba(255,255,255,0.035));
+}
+
+.calendar-board__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.calendar-board__eyebrow {
+  margin: 0 0 0.25rem;
+  color: var(--gold);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.calendar-board h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  font-weight: 600;
+}
+
+.calendar-board__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.calendar-board__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.55rem;
+  background: rgba(10, 14, 23, 0.45);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-dot--travel { background: var(--travel); }
+.legend-dot--bali { background: var(--bali); }
+.legend-dot--java { background: var(--java); }
+.legend-dot--singapore { background: var(--sg); }
+
+.calendar-week {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.calendar-week + .calendar-week { margin-top: 0.75rem; }
+
+.calendar-week__label {
+  display: grid;
+  place-items: center;
+  min-height: 160px;
+  color: var(--gold);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  background: rgba(10, 14, 23, 0.5);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.75rem;
+}
+
+.calendar-card {
+  position: relative;
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.85rem;
+  overflow: hidden;
+  color: var(--text);
+  text-align: left;
+  font-family: inherit;
+  background: rgba(18, 24, 38, 0.78);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.calendar-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,0.24);
+}
+
+.calendar-card--active {
+  transform: translateY(-4px);
+  border-color: rgba(232, 200, 114, 0.72);
+  box-shadow: 0 18px 46px rgba(0,0,0,0.42);
+}
+
+.calendar-card--travel.calendar-card--active { box-shadow: 0 18px 46px var(--travel-glow); }
+.calendar-card--bali.calendar-card--active { box-shadow: 0 18px 46px var(--bali-glow); }
+.calendar-card--java.calendar-card--active { box-shadow: 0 18px 46px var(--java-glow); }
+.calendar-card--singapore.calendar-card--active { box-shadow: 0 18px 46px var(--sg-glow); }
+
+.calendar-card__shine {
+  position: absolute;
+  inset: 0;
+  opacity: 0.65;
+  pointer-events: none;
+  background: linear-gradient(135deg, transparent, rgba(255,255,255,0.08));
+}
+
+.calendar-card--travel .calendar-card__shine { background: radial-gradient(circle at 85% 12%, var(--travel-glow), transparent 42%); }
+.calendar-card--bali .calendar-card__shine { background: radial-gradient(circle at 85% 12%, var(--bali-glow), transparent 42%); }
+.calendar-card--java .calendar-card__shine { background: radial-gradient(circle at 85% 12%, var(--java-glow), transparent 42%); }
+.calendar-card--singapore .calendar-card__shine { background: radial-gradient(circle at 85% 12%, var(--sg-glow), transparent 42%); }
+
+.calendar-card__top,
+.calendar-card__body,
+.calendar-card__route,
+.calendar-card__footer,
+.calendar-card__tags {
+  position: relative;
+  z-index: 1;
+}
+
+.calendar-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.calendar-card__date {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.calendar-card__date strong {
+  font-size: 0.92rem;
+  color: var(--gold);
+}
+
+.calendar-card__date small,
+.calendar-card__subtitle,
+.calendar-card__route {
+  color: var(--text-muted);
+}
+
+.calendar-card__icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.09);
+  font-size: 1.25rem;
+}
+
+.calendar-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.calendar-card__region {
+  width: fit-content;
+  padding: 0.2rem 0.45rem;
+  color: #0a0e17;
+  background: var(--gold);
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.calendar-card__title {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.calendar-card__subtitle {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.calendar-card__route {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: auto;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--glass-border);
+  font-size: 0.68rem;
+}
+
+.calendar-card__route span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.calendar-card__footer,
+.calendar-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.calendar-card__footer span,
+.calendar-card__tags span {
+  padding: 0.22rem 0.45rem;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 0.64rem;
+  font-weight: 700;
+}
+
+/* ── Stage ── */
+.stage {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2rem;
+}
+
+.stage__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.stage__arrow {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  color: var(--text);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.stage__arrow:hover:not(:disabled) { background: rgba(255,255,255,0.12); }
+.stage__arrow:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.stage__counter {
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── Day explorer (map-first) ── */
+.day-explorer {
+  animation: fadeUp 0.35s ease;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+}
+
+.day-explorer--bali { box-shadow: 0 24px 60px var(--bali-glow); }
+.day-explorer--java { box-shadow: 0 24px 60px var(--java-glow); }
+.day-explorer--singapore { box-shadow: 0 24px 60px var(--sg-glow); }
+.day-explorer--travel { box-shadow: 0 24px 60px var(--travel-glow); }
+
+.day-explorer__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.day-explorer__bar-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.day-explorer__bar-icon {
+  font-size: 1.75rem;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.day-explorer__bar-kicker {
+  margin: 0;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.day-explorer__bar-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0.1rem 0 0;
+  line-height: 1.15;
+}
+
+.day-explorer__bar-loc {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.day-explorer__bar-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.chip {
+  font-size: 0.65rem;
+  padding: 0.3rem 0.6rem;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.day-explorer__maps-link {
+  padding: 0.45rem 0.9rem;
+  background: var(--gold);
+  color: #0a0e17;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: transform 0.15s;
+}
+
+.day-explorer__maps-link:hover { transform: scale(1.03); }
+
+.day-explorer__map-wrap {
+  position: relative;
+  background: #1e293b;
+}
+
+.day-explorer__map {
+  width: 100%;
+  height: 55vh;
+  min-height: 360px;
+  max-height: 620px;
+  border: 0;
+  display: block;
+  filter: saturate(1.1) contrast(1.05);
+}
+
+.flight-route--compact {
+  margin: 0;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+}
+
+/* Flight route card */
+.flight-route {
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, rgba(96,165,250,0.12), rgba(167,139,250,0.08));
+  border-bottom: 1px solid rgba(96,165,250,0.25);
+}
+
+.flight-route__leg {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 600;
+  gap: 0.5rem;
+}
+
+.flight-route__plane {
+  color: var(--gold);
+  font-size: 1rem;
+  animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.flight-route__layover {
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--travel);
+  margin: 0.35rem 0;
+  font-weight: 600;
+}
+
+.flight-route__total {
+  text-align: center;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin: 0.35rem 0 0;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Drawer (expandable sections) */
+.day-explorer__drawer {
+  padding: 0.75rem;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.expand-section {
+  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.expand-section__trigger {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.expand-section__trigger:hover { background: var(--glass); }
+
+.expand-section__left { display: flex; align-items: center; gap: 0.5rem; }
+
+.expand-section__icon { font-size: 1rem; }
+
+.expand-section__badge {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.5rem;
+  background: var(--glass);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.expand-section__chev { color: var(--gold); font-size: 0.85rem; }
+
+.expand-section__body {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--glass-border);
+  animation: fadeUp 0.25s ease;
+}
+
+/* Timeline (full) */
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0 0;
+  position: relative;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 12px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--glass-border);
+}
+
+.timeline__item {
+  display: flex;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+}
+
+.timeline__icon {
+  width: 40px; height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 2px solid var(--glass-border);
+  border-radius: 50%;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.timeline__item--flight .timeline__icon { border-color: var(--travel); background: rgba(96,165,250,0.2); }
+
+.timeline__time {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.timeline__title {
+  margin: 0.1rem 0;
+  font-size: 0.9rem;
+}
+
+.timeline__detail {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.timeline__transport {
+  margin-top: 0.4rem;
+  padding: 0.5rem 0.65rem;
+  background: var(--glass);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.timeline__transport-route { font-weight: 600; }
+
+/* Cards */
+.restaurant-grid, .attraction-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+.restaurant-card, .attraction-card {
+  padding: 0.85rem;
+  background: var(--surface-2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+}
+
+.restaurant-card__label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+}
+
+.restaurant-card__time {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-align: right;
+  line-height: 1.3;
+}
+
+.restaurant-card__header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.restaurant-card__name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  margin: 0 0 0.35rem;
+}
+
+.restaurant-card__dishes {
+  margin: 0 0 0.5rem;
+  padding-left: 1rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.restaurant-card__cost {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--java);
+  margin: 0 0 0.35rem;
+}
+
+.restaurant-card__note {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0 0 0.35rem;
+}
+
+.restaurant-card__links { display: flex; gap: 0.75rem; }
+
+.restaurant-card__links a {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--gold);
+  text-decoration: none;
+}
+
+.attraction-card__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.attraction-card__top h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+}
+
+.attraction-card__time { font-size: 0.68rem; color: var(--text-muted); white-space: nowrap; }
+
+.attraction-card__meta {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.35rem;
+}
+
+.attraction-card__photos ul {
+  margin: 0.25rem 0 0.5rem;
+  padding-left: 1rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.attraction-card__map {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--gold);
+  text-decoration: none;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+.info-box {
+  padding: 0.75rem;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+}
+
+.info-box h3 {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  margin: 0 0 0.35rem;
+}
+
+.info-box p, .info-box ul {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.info-box ul { padding-left: 1rem; }
+
+.special-dl { margin: 0.75rem 0 0; }
+
+.special-dl__row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 0.5rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--glass-border);
+  font-size: 0.78rem;
+}
+
+.special-dl__row:last-child { border-bottom: none; }
+
+.special-dl dt { font-weight: 600; color: var(--gold); }
+.special-dl dd { margin: 0; color: var(--text-muted); }
+
+.highlights-list {
+  margin: 0.75rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Budget & emergency (modal) */
+.budget-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.budget-card {
+  padding: 0.85rem;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+}
+
+/* Modal — budget & contacts */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeUp 0.2s ease;
+}
+
+.modal {
+  width: 100%;
+  max-width: 640px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--surface-2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5);
+}
+
+.modal__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.modal__head h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  margin: 0;
+}
+
+.modal__close {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  background: var(--glass);
+  color: var(--text);
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modal__intro {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 1.25rem;
+}
+
+.modal__section {
+  margin-bottom: 1.25rem;
+}
+
+.modal__section h3 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  margin: 0 0 0.75rem;
+}
+
+.modal__section h4 {
+  font-size: 0.75rem;
+  margin: 0 0 0.35rem;
+  color: var(--text-muted);
+}
+
+.budget-card h3,
+.budget-card h4 {
+  font-size: 0.75rem;
+  margin: 0 0 0.35rem;
+  color: var(--text-muted);
+}
+
+.budget-card__range {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--gold);
+  margin: 0 0 0.25rem;
+}
+
+.budget-card__note {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.emergency__list {
+  padding-top: 0.75rem;
+}
+
+.emergency__list > div {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--glass-border);
+  font-size: 0.78rem;
+}
+
+.emergency__list dt { font-weight: 600; color: var(--text); }
+.emergency__list dd { margin: 0; color: var(--text-muted); }
+
+/* Responsive */
+@media (max-width: 960px) {
+  .calendar-board__header { align-items: flex-start; flex-direction: column; }
+  .calendar-board__legend { justify-content: flex-start; }
+  .calendar-week { grid-template-columns: 1fr; }
+  .calendar-week__label {
+    min-height: auto;
+    justify-content: flex-start;
+    padding: 0.55rem 0.75rem;
+    writing-mode: initial;
+    transform: none;
+  }
+  .day-explorer__map { min-height: 280px; height: 45vh; }
+  .day-explorer__bar { flex-direction: column; align-items: stretch; }
+  .day-explorer__maps-link { text-align: center; }
+}
+
+@media (max-width: 640px) {
+  .masthead__top { flex-direction: column; }
+  .masthead__actions { justify-content: flex-start; }
+  .stage { padding: 0.75rem 0.75rem 1.5rem; }
+  .calendar-board { padding: 0.75rem; border-radius: var(--radius); }
+  .calendar-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 0.25rem;
+  }
+  .calendar-card {
+    min-width: 82vw;
+    scroll-snap-align: start;
+  }
+  .journey-strip__days { margin-left: 0; width: 100%; margin-top: 0.5rem; }
+  .special-dl__row { grid-template-columns: 1fr; }
+  .emergency__list > div { grid-template-columns: 1fr; }
+}
+
+/* Print */
+@media print {
+  body { background: #fff; color: #000; }
+  .masthead, .calendar-board, .stage__nav, .expand-section__trigger, .modal-backdrop { display: none !important; }
+  .day-explorer__map-wrap { display: none; }
+  .expand-section__body { display: block !important; }
+  .expand-section { break-inside: avoid; }
+}

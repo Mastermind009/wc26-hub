@@ -12,3 +12,12 @@ services:
         value: 20.18.0
       - key: ADMIN_SECRET
         sync: false
+  - type: static
+    name: wc26-itinerary
+    rootDir: itinerary
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    pullRequestPreviewsEnabled: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
