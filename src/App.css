@@ -1400,21 +1400,32 @@ select:focus {
   }
 }
 
-@media (max-width: 640px) {
-  .stats-bar {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .header {
+@media (max-width: 768px) {
+  .header--mobile {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     transition: transform 0.28s ease, opacity 0.22s ease, box-shadow 0.28s ease;
     will-change: transform;
   }
 
-  .header--collapsed {
+  .header-spacer {
+    transition: height 0.28s ease;
+    flex-shrink: 0;
+  }
+
+  .header--mobile.header--collapsed {
     transform: translateY(-100%);
     opacity: 0;
     pointer-events: none;
     box-shadow: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .stats-bar {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .header-inner {
